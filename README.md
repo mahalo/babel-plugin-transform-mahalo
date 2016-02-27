@@ -1,11 +1,11 @@
-# babel-plugin-access
+# access-babel
 
 
 
 ## Installation
 
 ```sh
-$ npm install babel-plugin-access
+$ npm install access-babel
 ```
 
 ## Usage
@@ -16,20 +16,20 @@ $ npm install babel-plugin-access
 
 ```json
 {
-    "plugins": ["access"]
+    "plugins": ["access-babel"]
 }
 ```
 
 ### Via CLI
 
 ```sh
-$ babel --plugins access script.js
+$ babel --plugins access-babel script.js
 ```
 
 ### Via Node API
 
 ```javascript
 require("babel-core").transform("code", {
-    plugins: ["access"]
+    plugins: ["access-babel"]
 });
 ```
