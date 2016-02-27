@@ -23,6 +23,7 @@ export default function({types: t}) {
 					t.callExpression(
 						update(state),
 						[
+							arg,
 							arg.object,
 							arg.computed ? arg.property : t.stringLiteral(arg.property.name)
 						]
@@ -49,6 +50,7 @@ export default function({types: t}) {
 			}
 			
 			params.unshift(
+				arg,
 				arg.object,
 				arg.computed ? arg.property : t.stringLiteral(arg.property.name)
 			);
