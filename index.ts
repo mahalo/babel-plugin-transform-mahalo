@@ -2,28 +2,48 @@ export default function({types: t}) {
     return {
         visitor: {
             AssignmentExpression(path, state) {
-				assignment(path, state, path.node.left);
+				var node = path.node,
+					arg = node.left,
+					value = node,
+					operator;
+				
+				if (t.isMemberExpression(arg)) {
+					operator = node.operator[0];
+					
+					if (operator !== '=') {
+						value = t.binaryExpression(operator, arg, node.right);
+					} else {
+						value = node.right;
+					}
+				}
+				
+				assignment(path, state, arg, value);
 			},
 			
             UpdateExpression(path, state) {
-				assignment(path, state, path.node.argument);
+				var node = path.node,
+					arg = node.argument,
+					value = node;
+				
+				if (t.isMemberExpression(arg)) {
+					value = t.binaryExpression(node.operator[0], arg, t.numericLiteral(1));
+				}
+				
+				assignment(path, state, arg, value);
 			},
 
             UnaryExpression(path, state) {
                 var node = path.node,
 					arg = node.argument;
 
-				if (node.updated || !t.isMemberExpression(arg) || node.operator !== 'delete') {
+				if (!t.isMemberExpression(arg) || node.operator !== 'delete') {
 					return;
 				}
 				
-				node.updated = true;
-				
 				path.replaceWith(
 					t.callExpression(
-						update(state),
+						assign(state),
 						[
-							arg,
 							arg.object,
 							arg.computed ? arg.property : t.stringLiteral(arg.property.name)
 						]
@@ -33,38 +53,34 @@ export default function({types: t}) {
         }
     };
 	
-	function assignment(path, state, arg) {
-		var node = path.node;
+	function assignment(path, state, arg, value) {
+		var node = path.node,
+			params;
 
 		if (node.updated) {
 			return;
 		}
 		
+		params = [];
 		node.updated = true;
 		
-		var params = [node];
-
 		if (t.isMemberExpression(arg)) {
 			if (t.isIdentifier(arg.object) && arg.object.name === 'exports') {
 				return;
 			}
 			
-			params.unshift(
-				arg,
+			params.push(
 				arg.object,
 				arg.computed ? arg.property : t.stringLiteral(arg.property.name)
 			);
 		}
 		
-		path.replaceWith(
-			t.callExpression(
-				update(state),
-				params
-			)
-		);
+		params.push(value);
+		
+		path.replaceWith(t.callExpression(assign(state), params));
 	}
 }
 
-function update(state) {
-	return state.addImport('access-core/observer/update', 'default');
+function assign(state) {
+	return state.addImport('access-core/change-detection/property', 'assign', 'assign');
 }
