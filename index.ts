@@ -82,5 +82,5 @@ export default function({types: t}) {
 }
 
 function assign(state) {
-	return state.addImport('access-core/change-detection/property', 'assign', 'assign');
+	return state.addImport('mahalo/change-detection/property', 'assign', 'assign');
 }
