@@ -1,11 +1,11 @@
-# access-babel
+# babel-plugin-transform-mahalo
 
 
 
 ## Installation
 
 ```sh
-$ npm install access-babel
+$ npm install babel-plugin-transform-mahalo
 ```
 
 ## Usage
@@ -16,20 +16,20 @@ $ npm install access-babel
 
 ```json
 {
-    "plugins": ["access-babel"]
+    "plugins": ["transform-mahalo"]
 }
 ```
 
 ### Via CLI
 
 ```sh
-$ babel --plugins access-babel script.js
+$ babel --plugins transform-mahalo script.js
 ```
 
 ### Via Node API
 
 ```javascript
 require("babel-core").transform("code", {
-    plugins: ["access-babel"]
+    plugins: ["transform-mahalo"]
 });
 ```

@@ -1,5 +1,5 @@
 {
-    "name": "babel-plugin-mahalo",
+    "name": "babel-plugin-transform-mahalo",
     "version": "0.6.0",
     "description": "Babel plugin to transpile ES6 files for Mahalo JS apps",
     "main": "index.js",
