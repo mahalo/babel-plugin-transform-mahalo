@@ -1,7 +1,18 @@
 export default function({types: t}) {
+	var skip;
+	
     return {
+		pre(file) {
+			if (/^(node_modules|\.\.)\\mahalo\\/.test(file.opts.sourceFileName)) {
+				skip = true;
+			}
+		},
         visitor: {
             AssignmentExpression(path, state) {
+				if (skip) {
+					return;
+				}
+				
 				var node = path.node,
 					arg = node.left,
 					value = node,
@@ -21,6 +32,10 @@ export default function({types: t}) {
 			},
 			
             UpdateExpression(path, state) {
+				if (skip) {
+					return;
+				}
+				
 				var node = path.node,
 					arg = node.argument,
 					value = node;
@@ -33,6 +48,10 @@ export default function({types: t}) {
 			},
 
             UnaryExpression(path, state) {
+				if (skip) {
+					return;
+				}
+				
                 var node = path.node,
 					arg = node.argument;
 
