@@ -1,11 +1,11 @@
+var MAHALO = /^(node_modules|\.\.)\\mahalo\\/;
+
 export default function({types: t}) {
 	var skip;
 	
     return {
 		pre(file) {
-			if (/^(node_modules|\.\.)\\mahalo\\/.test(file.opts.sourceFileName)) {
-				skip = true;
-			}
+			skip = MAHALO.test(file.opts.sourceFileName);
 		},
         visitor: {
             AssignmentExpression(path, state) {
