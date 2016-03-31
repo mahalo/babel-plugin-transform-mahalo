@@ -156,7 +156,7 @@ export default function({types: t}) {
 }
 
 function assign(state) {
-	return state.addImport('mahalo/change-detection/property', 'assign', 'assign');
+	return state.addImport('mahalo/change-detection/assign', 'default', 'assign');
 }
 
 function callMethod(state) {
