@@ -19,6 +19,7 @@ var MAHALO = /^(node_modules|\.\.)\\mahalo\\/,
 
 export default function({types: t}) {
 	var first = true,
+		route,
 		skip;
 	
     return {
@@ -26,6 +27,8 @@ export default function({types: t}) {
 			skip = MAHALO.test(file.opts.sourceFileName);
 		},
         visitor: {
+			// Assigment rewriting
+			
             AssignmentExpression(path, state) {
 				if (skip) {
 					return;
@@ -88,6 +91,9 @@ export default function({types: t}) {
 				);
             },
 			
+			
+			// Array and String instance methods rewriting for babel-runtime
+			
 			CallExpression(path, state) {
 				var node = path.node,
 					callee = node.callee,
@@ -115,6 +121,57 @@ export default function({types: t}) {
 				);
 			},
 			
+			
+			// Code splitting for routes
+			
+			Class(path) {
+				if (!extendsRoute(path)) {
+					return;
+				}
+				
+				var node = path.node,
+					body = node.body.body,
+					i = body.length,
+					property,
+					template;
+				
+				while (i--) {
+					property = body[i];
+					
+					if (t.isClassProperty(property) && property.static && property.key.name === 'view' && t.isStringLiteral(property.value)) {
+						template = property.value.value;
+						
+						property.value = t.functionExpression(null, [], t.blockStatement([
+								t.returnStatement(t.newExpression(t.identifier('Promise'), [
+									t.functionExpression(null,[t.identifier('resolve')], t.blockStatement([
+										t.expressionStatement(t.callExpression(
+											t.memberExpression(
+												t.identifier('require'),
+												t.identifier('ensure')
+											),
+											[
+												t.arrayExpression([t.stringLiteral(template)]),
+												t.functionExpression(null, [t.identifier('require')], t.blockStatement([
+													t.expressionStatement(t.callExpression(
+														t.identifier('resolve'),
+														[t.callExpression(t.identifier('require'),[t.stringLiteral(template)])]
+													))
+												],[]))
+											]
+										))
+									], []))
+								]))
+							], []
+						));
+						
+						i = 0;
+					}
+				}
+			},
+			
+			
+			// Polyfilling for IE < 11
+			
 			Program: {
 				exit(path, state) {
 					if (first) {
@@ -122,6 +179,8 @@ export default function({types: t}) {
 						state.addImport('mahalo/polyfill/get-prototype-of', null, null);
 						first = false;
 					}
+					
+					route = null;
 				}
 			}
         }
@@ -152,6 +211,50 @@ export default function({types: t}) {
 		params.push(value);
 		
 		path.replaceWith(t.callExpression(assign(state), params));
+	}
+	
+	/**
+	 * Checks if a class extends Route
+	 */
+	function extendsRoute(path) {
+		var node = path.node,
+			superClass = node.superClass;
+		
+		if (!superClass) {
+			return false;
+		}
+		
+		var binding = path.scope.getBinding(superClass.name);
+		
+		if (binding.kind !== 'module') {
+			return false;
+		}
+		
+		node = binding.path.parent;
+		
+		var	source = node.source,
+			name = source.value,
+			checkImportSpecifier = name === 'mahalo' || name === 'mahalo/mahalo',
+			checkDefaultSpecifier = name === 'mahalo/components/route';
+		
+		if (!checkImportSpecifier) {
+			return false;
+		}
+		
+		var specifiers = node.specifiers,
+			i = specifiers.length,
+			specifier;
+		
+		while (i--) {
+			specifier = specifiers[i];
+			
+			// @todo: Make default import work as well
+			if (specifier === binding.path.node && specifier.imported.name === 'Route') {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }
 
