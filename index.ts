@@ -233,11 +233,9 @@ export default function({types: t}) {
         node = binding.path.parent;
         
         var	source = node.source,
-            name = source.value,
-            checkImportSpecifier = name === 'mahalo' || name === 'mahalo/mahalo',
-            checkDefaultSpecifier = name === 'mahalo/components/route';
+            name = source.value;
         
-        if (!checkImportSpecifier) {
+        if (name !== 'mahalo' && name !== 'mahalo/mahalo') {
             return false;
         }
         
@@ -248,7 +246,6 @@ export default function({types: t}) {
         while (i--) {
             specifier = specifiers[i];
             
-            // @todo: Make default import work as well
             if (specifier === binding.path.node && specifier.imported.name === 'Route') {
                 return true;
             }
@@ -259,7 +256,7 @@ export default function({types: t}) {
 }
 
 function assign(state) {
-    return state.addImport('mahalo/change-detection/assign', 'default', 'assign');
+    return state.addImport('mahalo', 'assign', 'assign');
 }
 
 function callMethod(state) {
