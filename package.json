@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-mahalo",
-  "description": "Babel plugin to transpile ES6 files for Mahalo JS apps",
+  "description": "Babel plugin to transpile ES2015 files for Mahalo applications",
   "version": "0.6.0",
   "author": {
     "name": "Markus Schmidt",

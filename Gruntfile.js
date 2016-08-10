@@ -13,9 +13,9 @@ module.exports = function(grunt) {
         }
     });
     
-    grunt.registerTask('appendix', function() {
+    grunt.registerTask('postprocess', function() {
         fs.writeFileSync('index.js', fs.readFileSync('index.js') + '\nmodule.exports = exports.default;\n');
     });
     
-    grunt.registerTask('default', ['babel:dist', 'appendix']);
+    grunt.registerTask('default', ['babel:dist', 'postprocess']);
 };
